@@ -1,8 +1,14 @@
 module Enterprise::Internal::CheckNewVersionsJob
   def perform
-    super
-    update_plan_info
-    reconcile_premium_config_and_features
+    update_installation_config(key: 'INSTALLATION_PRICING_PLAN', value: 'premium')
+    update_installation_config(key: 'INSTALLATION_PRICING_PLAN_QUANTITY', value: '999999')
+    update_installation_config(key: 'CHATWOOT_SUPPORT_WEBSITE_TOKEN', value: 'mocked-token')
+    update_installation_config(key: 'CHATWOOT_SUPPORT_IDENTIFIER_HASH', value: 'mocked-hash')
+    update_installation_config(key: 'CHATWOOT_SUPPORT_SCRIPT_URL', value: 'https://enterprise.local/script.js')
+
+    Rails.logger.info "[CheckNewVersionsJob] Forçado modo enterprise e plano liberado manualmente."
+
+    # Dispensamos chamadas externas e reconciliação para manter controle total
   end
 
   private
@@ -19,7 +25,7 @@ module Enterprise::Internal::CheckNewVersionsJob
 
   def update_installation_config(key:, value:)
     config = InstallationConfig.find_or_initialize_by(name: key)
-    config.value = value
+    config.value = value.to_s
     config.locked = true
     config.save!
   end
