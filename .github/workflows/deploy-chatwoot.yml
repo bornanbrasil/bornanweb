@@ -44,10 +44,15 @@ jobs:
       # Builds and pushes an image up to your Azure Container Registry
       - name: Build and push image to ACR
         run: |
-          az acr build --image ${{ env.AZURE_CONTAINER_REGISTRY }}.azurecr.io/${{ env.CONTAINER_NAME }}:latest --registry ${{ env.AZURE_CONTAINER_REGISTRY }} -g ${{ env.ACR_RESOURCE_GROUP }} -f ${{ env.DOCKER_FILE }} ${{ env.BUILD_CONTEXT_PATH }}
+          GIT_SHA=$(git rev-parse HEAD)
+          az acr build \
+            --image ${{ env.AZURE_CONTAINER_REGISTRY }}.azurecr.io/${{ env.CONTAINER_NAME }}:latest \
+            --registry ${{ env.AZURE_CONTAINER_REGISTRY }} \
+            -g ${{ env.ACR_RESOURCE_GROUP }} \
+            --build-arg GIT_SHA=$GIT_SHA \
+            -f ${{ env.DOCKER_FILE }} ${{ env.BUILD_CONTEXT_PATH }}
 
-
-  build-and-deploy:
+  deploy:
     permissions:
       contents: read
       id-token: write
